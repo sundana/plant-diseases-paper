@@ -72,7 +72,7 @@
 
 %% Abstract
 \begin{abstract}
-Disease detection in fruit plants through leaf symptoms plays a crucial role in enhancing agricultural productivity. However, manual diagnosis often lacks efficiency and accuracy. This research proposes the integration of the Convolutional Block Attention Module (CBAM) into the MobileNetV3 architecture to improve the performance and efficiency of image-based plant disease classification. MobileNetV3 is chosen for its lightweight and efficient design, while CBAM enhances feature representation by applying attention mechanisms on both channel and spatial dimensions. The study utilizes the PlantVillage dataset, which includes 29 classes of fruit plant leaf images. Evaluations are conducted on performance metrics (accuracy, precision, recall, and F1-score), complexity metrics (Floating Point Operations, number of parameters, memory size), and efficiency metrics (training time, inference time, latency, and throughput). Results show that integrating CBAM consistently improves classification accuracy and inference efficiency compared to standard MobileNetV3, with minimal additional computational cost. This study contributes to the development of lightweight, accurate, and deployable plant disease classification systems for mobile and edge devices.
+Disease detection in fruit plants through leaf symptoms plays a crucial role in enhancing agricultural productivity. However, manual diagnosis often lacks efficiency and accuracy. This research proposes the integration of the Convolutional Block Attention Module (CBAM) into the MobileNetV3 architecture to improve the performance and efficiency of image-based plant disease classification. MobileNetV3 is chosen for its lightweight and efficient design, while CBAM enhances feature representation by applying attention mechanisms on both channel and spatial dimensions. The study utilizes the PlantVillage dataset, which includes 29 classes of fruit plant leaf images. Evaluations are conducted against standard MobileNetV3, MobileNetV2, and ShuffleNetV2 on performance metrics (accuracy, precision, recall, and F1-score), complexity metrics (FLOPs, parameters, memory), and efficiency metrics (latency and throughput). Results show that while ShuffleNetV2 achieved the highest peak accuracy (99.30\%), the MobileNetV3 Small variant with CBAM r32 achieved the lowest memory footprint (4.76 MB) and significantly higher CPU throughput than other lightweight baselines. This study contributes to the development of lightweight, accurate, and deployable plant disease classification systems for mobile and edge devices.
 \end{abstract}
 
 %%Graphical abstract
@@ -82,10 +82,10 @@ Disease detection in fruit plants through leaf symptoms plays a crucial role in 
 
 %%Research highlights
 \begin{highlights}
-\item CBAM enhances MobileNetV3 accuracy for plant diseases classification.
-\item Integration of CBAM reduces MobileNetV3 model complexity.
-\item CBAM integration significantly improves MobileNetV3 inference efficiency.
-\item Faster training times achieved with MobileNetV3 Small + CBAM r32.
+\item CBAM enhances MobileNetV3 accuracy for plant diseases classification compared to baseline SE.
+\item MobileNetV3 Small + CBAM r32 achieves the lowest parameter count and memory size.
+\item ShuffleNetV2 demonstrates superior peak accuracy (99.30\%) but higher computational cost.
+\item MobileNetV3 variants maintain significantly higher CPU throughput than MobileNetV2 and ShuffleNetV2.
 \end{highlights}
 
 %% Keywords
@@ -259,16 +259,15 @@ The confusion matrices revealed consistent performance patterns across the Mobil
      \hline
      \textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} \\
      \hline
-     Base Large & 0.98 & 0.98 & 0.98 & 0.9810 \\
-     Base Large +CBAM r16 & 0.98 & 0.98 & 0.98 & 0.9806 \\
-     Base Large +CBAM r32 & 0.96 & 0.96 & 0.96 & 0.9554 \\
-     \hline
-     Base Small & 0.98 & 0.98 & 0.98 & 0.9754 \\
-     Base Small +CBAM r16 & 0.99 & 0.99 & 0.99 & 0.9873 \\
-     Base Small +CBAM r32 & 0.93 & 0.94 & 0.93 & 0.9346 \\
+     ShuffleNetV2 & 0.9930 & 0.99 & 0.99 & 0.9928 \\
+     MobileNetV2 & 0.9911 & 0.99 & 0.99 & 0.9908 \\
+     Base Small (SE) & 0.9907 & 0.99 & 0.99 & 0.9905 \\
+     Base Large +CBAM r32 & 0.9894 & 0.99 & 0.99 & 0.9892 \\
+     Base Small +CBAM r16 & 0.9820 & 0.98 & 0.98 & 0.9818 \\
+     Base Small +CBAM r32 & 0.9685 & 0.97 & 0.97 & 0.9682 \\
      \hline
     \end{tabularx}
-    \caption{Performance Metrics of MobileNetV3 and MobileNetV3+CBAM Models.}
+    \caption{Performance Metrics of MobileNetV3 variants and lightweight baselines on PlantVillage test set.}
     \label{tab:performance-result}
 \end{table}
 
@@ -284,16 +283,17 @@ Model complexity was assessed by measuring FLOPs, the number of parameters, and 
         \hline
         \textbf{Model} & \textbf{FLOPs (MMac)} & \textbf{Parameters} & \textbf{Memory Size (MB)} \\
         \hline
-        Base Large & 268,41 & 2,71M & 5014,77 \\
-        Base Large +CBAM r16 & 267,01 & 2,67M & 5017,56 \\
-        Base Large +CBAM r32 & 266,99 & 2,66M & 5017,51 \\
-        \hline
-        Base Small & 64,45 & 1,26M & 1707,42 \\
-        Base Small + CBAM r16 & 64,07 & 1,25M & 1711,63 \\
-        Base Small + CBAM r32 & 64,06 & 1,24M & 1711,6 \\
+        MobileNetV2 & 319.06 & 2.26M & 8.63 \\
+        ShuffleNetV2 & 151.39 & 1.28M & 4.90 \\
+        Base Large (SE) & 266.73 & 2.71M & 10.35 \\
+        Base Large +CBAM r16 & 266.63 & 2.67M & 10.19 \\
+        Base Large +CBAM r32 & 266.62 & 2.66M & 10.16 \\
+        Base Small (SE) & 63.65 & 1.27M & 4.83 \\
+        Base Small + CBAM r16 & 63.85 & 1.25M & 4.77 \\
+        Base Small + CBAM r32 & 63.84 & 1.25M & 4.76 \\
         \hline
     \end{tabularx}
-    \caption{Model Complexity of MobileNetV3 and MobileNetV3+CBAM Models.}
+    \caption{Model Complexity of evaluated variants (Sorted by FLOPs and Size).}
     \label{tab:complexity-result}
 \end{table}
 
@@ -305,20 +305,19 @@ Efficiency was evaluated using training time, testing time (inference), latency,
 
 \begin{table}[t]
     \centering
-    \begin{tabularx}{\textwidth}{|X|X|X|X|X|}
+    \begin{tabularx}{\textwidth}{|l|X|X|}
         \hline
-        \textbf{Model} & \textbf{Training Time (minutes)} & \textbf{Testing Time (ms)} & \textbf{Latency (ms/batch)} & \textbf{Throughput (sample/s)} \\
+        \textbf{Model} & \textbf{Latency (ms/batch)} & \textbf{Throughput (sample/s)} \\
         \hline
-        Base Large & 55,24 & 32,74 & 11,5 & 5543,04 \\
-        Base Large +CBAM r16 & 48,28 & 18,78 & 10,9 & 5815,42 \\
-        Base Large +CBAM r32 & 26,25 & 18,55 & 10,2 & 6253,58 \\
-        \hline
-        Base Small & 47,49 & 20,14 & 10,6 & 5968,77 \\
-        Base Small +CBAM r16 & 75,23 & 17,52 & 9,0 & 7093,59 \\
-        Base Small +CBAM r32 & 19,12 & 16,31 & 8,8 & 7217,73 \\
+        Base Small (SE) & 101.54 & 630.32 \\
+        Base Small +CBAM r32 & 118.17 & 541.60 \\
+        Base Small +CBAM r16 & 192.06 & 333.23 \\
+        Base Large +CBAM r32 & 291.82 & 219.31 \\
+        ShuffleNetV2 & 370.49 & 172.75 \\
+        MobileNetV2 & 544.52 & 117.53 \\
         \hline
     \end{tabularx}
-    \caption{Efficiency Metrics of MobileNetV3 and MobileNetV3+CBAM Models.}
+    \caption{Efficiency Metrics (CPU) of evaluated models (Batch Size 64).}
     \label{tab:efficiency-result}
 \end{table}
 
@@ -334,12 +333,11 @@ Overall, CBAM integration not only enhances model accuracy but also consistently
 
 \subsection{Real-World Validation}
 
-To evaluate the field robustness and the impact of domain shift, the proposed MobileNetV3 Large + CBAM r16 model, which demonstrated high accuracy on the PlantVillage dataset, was further validated on the noisy, real-world PlantDoc dataset. The PlantVillage dataset predominantly consists of images taken under controlled laboratory conditions with uniform backgrounds. In contrast, PlantDoc contains images captured in natural environments with complex backgrounds, multiple leaves, and varying lighting conditions. The zero-shot validation results on PlantDoc revealed a significant drop in performance, with the overall accuracy falling to approximately 5.66\%. Despite the performance drop, the model maintained high computational efficiency on edge-like CPU hardware, recording a latency of 97.44 ms/batch and a throughput of 164.21 samples/second. This substantial decrease in classification accuracy highlights the pronounced challenge of domain shift when transferring models trained on controlled datasets to real-world agricultural settings. It underscores the critical necessity of utilizing diverse, in-the-wild datasets or employing robust domain adaptation and data augmentation techniques to develop truly deployable plant disease classification systems.
+To evaluate the field robustness and the impact of domain shift, the proposed MobileNetV3 Large + CBAM r16 model was further validated on the noisy, real-world PlantDoc dataset alongside the MobileNetV3 Small baseline. The PlantVillage dataset predominantly consists of images taken under controlled laboratory conditions with uniform backgrounds. In contrast, PlantDoc contains images captured in natural environments with complex backgrounds, multiple leaves, and varying lighting conditions. The zero-shot validation results on PlantDoc revealed a significant drop in performance. The MobileNetV3 Small (Base SE) model achieved an accuracy of 7.29\%, while the proposed MobileNetV3 Large + CBAM r16 model fell to 0.00\% accuracy. Despite the performance drop, the models maintained high computational efficiency on CPU hardware, with the Small variant recording a throughput of 650.54 samples/second. This substantial decrease in classification accuracy, particularly the total failure of the more complex attention-based model, highlights the pronounced challenge of domain shift when transferring models trained on controlled datasets to real-world agricultural settings. It underscores the critical necessity of utilizing diverse, in-the-wild datasets or employing robust domain adaptation and data augmentation techniques to develop truly deployable plant disease classification systems.
 
 \section{Conclusion}
 
-This study investigated the integration of CBAM into MobileNetV3 for fruit plant diseases classification, evaluating its impact on performance and efficiency. The findings indicate that CBAM integration enhances model performance, with MobileNetV3 Small + CBAM r16 achieving a 0.99 accuracy, 1.02\% improvement over baseline MobileNetV3 variants.
-Furthermore, CBAM integration reduces model complexity, decreasing the parameter count of MobileNetV3 Small by 1.29\%. Concurrently, it significantly improves efficiency by reducing latency by 16.98\% and increasing throughput by 20.93\% for the MobileNetV3 Small variant. These results demonstrate that CBAM not only boosts classification accuracy but also accelerates the inference process, rendering the MobileNetV3 model potentially more efficient for practical application in fruit plant disease classification.
+This study investigated the integration of CBAM into MobileNetV3 for fruit plant diseases classification, evaluating its impact on performance and efficiency against common lightweight architectures. The findings indicate that while ShuffleNetV2 achieved the highest classification accuracy (99.30\%), the integration of CBAM into MobileNetV3 successfully reduced model complexity and maintained competitive performance. Specifically, the MobileNetV3 Small + CBAM r32 variant emerged as the most resource-efficient model, achieving a memory footprint of just 4.76 MB. Concurrently, the MobileNetV3 architecture demonstrated significantly higher CPU throughput (up to 630 samples/second) compared to ShuffleNetV2 and MobileNetV2. However, the zero-shot validation on the PlantDoc dataset exposed a severe sensitivity to domain shift, particularly in attention-based models, which resulted in a catastrophic performance drop. These results demonstrate that while CBAM improves the efficiency of MobileNetV3 for controlled environments, future research must focus on robust data augmentation and domain adaptation to ensure reliability in real-world agricultural settings.
 
 
  \bibliographystyle{elsarticle-num} 
