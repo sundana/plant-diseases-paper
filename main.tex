@@ -73,7 +73,7 @@
 
 %% Abstract
 \begin{abstract}
-Disease detection in fruit plants through leaf symptoms plays a crucial role in enhancing agricultural productivity, yet manual diagnosis remains inefficient and error-prone. This research investigates the integration of the Convolutional Block Attention Module (CBAM) into the MobileNetV3 architecture and evaluates its impact on performance and efficiency for image-based plant disease classification. MobileNetV3 is chosen for its lightweight design, while CBAM applies dual attention on channel and spatial dimensions. Using the PlantVillage dataset with 29 classes of fruit plant leaf images, models are trained from scratch and evaluated against standard MobileNetV3 (with Squeeze-and-Excitation), MobileNetV2, and ShuffleNetV2 across performance, complexity, and efficiency metrics. Results show that MobileNetV3 Large with SE achieves the highest validation accuracy among MobileNetV3 variants (99.25\%), competitive with ShuffleNetV2 and MobileNetV2. CBAM r32, when trained for a sufficient number of epochs, reaches 98.72\% accuracy on the Small variant—surpassing the SE baseline—while achieving the lowest memory footprint of 4.76 MB. In contrast, CBAM r16 underperforms across both model sizes. All MobileNetV3 variants maintain substantially lower CPU latency and higher throughput than MobileNetV2 and ShuffleNetV2. However, zero-shot validation on the real-world PlantDoc dataset exposes catastrophic domain shift (0--7.29\% accuracy), highlighting that efficiency gains on curated benchmarks do not guarantee field deployability without domain adaptation.
+Disease detection in fruit plants through leaf symptoms plays a crucial role in enhancing agricultural productivity, yet manual diagnosis remains inefficient and error-prone. This research investigates the integration of the Convolutional Block Attention Module (CBAM) into the MobileNetV3 architecture and evaluates its impact on performance and efficiency for image-based plant disease classification. MobileNetV3 is chosen for its lightweight design, while CBAM applies dual attention on channel and spatial dimensions. Using the PlantVillage dataset with 29 classes, all models are trained from scratch and compared against MobileNetV3 with Squeeze-and-Excitation (SE), MobileNetV2, and ShuffleNetV2 across performance, complexity, and efficiency metrics. Results show ShuffleNetV2 achieves the highest test accuracy (99.21\%), while MobileNetV3 Large with SE reaches 98.97\%—the best among MobileNetV3 variants and only 0.10pp ahead of CBAM r32 (98.87\%). For the Small architecture, SE (98.75\%) and CBAM r32 (98.70\%) are statistically tied, with CBAM r32 offering the lowest memory footprint of 4.76 MB. CBAM r16 consistently underperforms across both model sizes (98.45\% Large, 97.75\% Small). Analysis of training dynamics reveals that CBAM r32 requires more epochs to converge (31 vs.\ 24 for Small) but is not inherently unstable, contradicting earlier findings from under-trained runs. Zero-shot validation on the real-world PlantDoc dataset exposes catastrophic domain shift (0--7.29\% accuracy), underscoring that efficiency gains on curated benchmarks do not guarantee field deployability without domain adaptation.
 \end{abstract}
 
 %%Graphical abstract
@@ -83,10 +83,10 @@ Disease detection in fruit plants through leaf symptoms plays a crucial role in 
 
 %%Research highlights
 \begin{highlights}
-\item MobileNetV3 Large with SE achieves 99.25\% validation accuracy, competitive with dedicated lightweight baselines ShuffleNetV2 and MobileNetV2.
-\item CBAM r32, when trained for sufficient epochs, reaches competitive accuracy (98.72\% Small) while reducing parameters versus SE; CBAM r16 consistently underperforms.
-\item MobileNetV3 Small + CBAM r32 achieves the lowest memory footprint (4.76 MB) among all evaluated models.
-\item Zero-shot PlantDoc validation reveals catastrophic domain shift (0--7.29\% accuracy), underscoring the need for domain adaptation in field deployment.
+\item ShuffleNetV2 achieves the highest test accuracy (99.21\%), followed by MobileNetV2 (99.16\%), on the PlantVillage 29-class benchmark.
+\item MobileNetV3 Large with SE reaches 98.97\% test accuracy, only 0.10pp ahead of CBAM r32 (98.87\%), demonstrating that CBAM r32 is competitive when adequately trained.
+\item For the Small architecture, SE (98.75\%) and CBAM r32 (98.70\%) are statistically indistinguishable, with CBAM r32 offering a 0.07 MB memory advantage (4.76 vs.\ 4.83 MB).
+\item CBAM r16 consistently underperforms SE and CBAM r32 across both model sizes (97.75--98.45\%), making it the least effective attention choice.
 \end{highlights}
 
 %% Keywords
@@ -318,25 +318,25 @@ The confusion matrices revealed consistent performance patterns across the Mobil
 \centering
     \begin{tabularx}{\textwidth}{ |l|X|X|X|X|X| }
      \hline
-     \textbf{Model} & \textbf{Val Acc (\%)} & \textbf{Epochs} & \textbf{Train Time (min)} & \textbf{Params} & \textbf{Memory (MB)} \\
+     \textbf{Model} & \textbf{Test Acc (\%)} & \textbf{Macro F1 (\%)} & \textbf{Params (M)} & \textbf{Memory (MB)} \\
      \hline
-     ShuffleNetV2 & 98.98 & 40 & 33 & 1.28M & 4.90 \\
-     MobileNetV2 & 98.66 & 40 & 57 & 2.26M & 8.63 \\
-     Large SE & \textbf{99.25} & 44 & 54 & 2.71M & 10.35 \\
-     Large +CBAM r16 & 97.91 & 23 & 27 & 2.67M & 10.19 \\
-     Large +CBAM r32 & 98.69 & 31 & 46 & 2.66M & 10.16 \\
-     Small SE & 98.37 & 24 & 20 & 1.27M & 4.83 \\
-     Small +CBAM r16 & 97.86 & 17 & 15 & 1.25M & 4.77 \\
-     Small +CBAM r32 & 98.72 & 31 & 26 & 1.25M & \textbf{4.76} \\
+     ShuffleNetV2 & \textbf{99.21} & \textbf{99.14} & 1.28 & 4.90 \\
+     MobileNetV2 & 99.16 & 99.07 & 2.26 & 8.63 \\
+     Large SE & 98.97 & 98.82 & 2.71 & 10.35 \\
+     Large +CBAM r32 & 98.87 & 98.75 & 2.66 & 10.16 \\
+     Small SE & 98.75 & 98.60 & 1.27 & 4.83 \\
+     Small +CBAM r32 & 98.70 & 98.60 & 1.25 & \textbf{4.76} \\
+     Large +CBAM r16 & 98.45 & 98.17 & 2.67 & 10.19 \\
+     Small +CBAM r16 & 97.75 & 97.48 & 1.25 & 4.77 \\
      \hline
     \end{tabularx}
-    \caption{Validation accuracy, training duration, and model complexity for all evaluated variants. Best values in \textbf{bold}. All models trained from scratch; parameters and memory from static complexity analysis.}
+    \caption{Test-set accuracy, macro-averaged F1-score, parameter count, and memory footprint for all evaluated models. Best values in \textbf{bold}. All models trained from scratch on PlantVillage (29 classes).}
     \label{tab:performance-result}
 \end{table}
 
-As summarized in Table \ref{tab:performance-result}, MobileNetV3 Large with SE attention achieved the highest validation accuracy among all evaluated models at 99.25\%, surpassing both ShuffleNetV2 (98.98\%) and MobileNetV2 (98.66\%). This demonstrates that the standard SE module, when paired with the Large backbone and trained for a sufficient number of epochs, delivers state-of-the-art accuracy for this task.
+As summarized in Table \ref{tab:performance-result}, ShuffleNetV2 achieved the highest test accuracy at 99.21\%, followed closely by MobileNetV2 at 99.16\%. Among the MobileNetV3 family, Large SE attained the best accuracy (98.97\%), though the margin over CBAM r32 was only 0.10 percentage points (98.97\% vs.\ 98.87\%). For the Small architecture, a near-tie emerged: SE reached 98.75\% while CBAM r32 scored 98.70\%, a difference of only 0.05pp—well within the range of random variation from data splitting. Small CBAM r32 achieved this parity while using fewer parameters (1.25M vs.\ 1.27M) and a smaller memory footprint (4.76 MB vs.\ 4.83 MB). CBAM r16 was consistently the weakest attention choice, scoring 98.45\% on Large and 97.75\% on Small—0.52--1.00pp below the next-best variant.
 
-The impact of CBAM integration varied significantly with reduction ratio and model size. For the Large variant, CBAM r32 reached 98.69\%—a modest 0.56 percentage point drop from SE—while CBAM r16 trailed at 97.91\%. For the Small variant, a surprising reversal occurred: CBAM r32 achieved 98.72\%, surpassing the SE baseline (98.37\%) by 0.35 percentage points. CBAM r16 again performed worst at 97.86\%. This pattern reveals three key findings: (1) the r32 reduction ratio is not inherently detrimental, as previously suggested by under-trained runs; (2) CBAM r32 requires more training epochs to converge (31 vs.\ 24 for Small SE) due to slower feature learning in the aggressively compressed attention bottleneck; and (3) CBAM r16, despite its gentler compression, fails to extract discriminative features as effectively as either SE or CBAM r32, possibly because the larger bottleneck retains redundant information that dilutes attention focus.
+These results reveal three main findings. First, the SE module and CBAM r32 are effectively interchangeable for the Small architecture, with CBAM r32 offering a slight complexity advantage at no statistically meaningful accuracy cost. Second, on the Large architecture, SE maintains a narrow but consistent edge over CBAM r32, suggesting that the higher-capacity backbone benefits more from the finer-grained channel reweighting of SE than from the dual attention of CBAM. Third, CBAM r16 underperforms across the board, indicating that a larger attention bottleneck (retaining more channels) does not necessarily preserve more useful information—it may instead introduce redundancy that dilutes attention focus.
 
 The confusion matrices, generated from the best checkpoint of each variant, revealed consistent diagonal dominance across all models, indicating accurate per-class predictions. Misclassifications were concentrated among visually similar classes—for instance, healthy grape and strawberry leaves were occasionally confused due to comparable morphology and coloration. Early-stage disease symptoms, such as tomato target spot lesions, proved challenging across all variants, with the CBAM r16 models showing the highest rate of such errors, consistent with their lower overall accuracy. Cross-species misclassifications were rare, confirming that the models primarily struggle with fine-grained intra-species symptom differentiation rather than broader class-level recognition.
 
@@ -386,15 +386,15 @@ Efficiency was evaluated using training time, testing time (inference), latency,
         Base Small +CBAM r32 & 118.17 & 541.60 \\
         \hline
     \end{tabularx}
-    \caption{Efficiency Metrics (CPU) of evaluated models (Batch Size 64).}
+    \caption{Efficiency Metrics (CPU) of evaluated models (Batch Size 64). Entries marked --- pending re-measurement on consistent hardware.}
     \label{tab:efficiency-result}
 \end{table}
 
 Table \ref{tab:efficiency-result} presents CPU latency and throughput for all evaluated models. The MobileNetV3 Small baseline with SE achieved the lowest latency (101.54 ms/batch) and highest throughput (630.32 samples/s). CBAM integration introduced a measurable CPU overhead: for the Small variant, CBAM r32 increased latency to 118.17 ms/batch (a 16.4\% increase) and reduced throughput to 541.60 samples/s. The impact was more pronounced for CBAM r16 (latency 192.06 ms/batch, throughput 333.23 samples/s). For the Large variant, CBAM r32 recorded 291.82 ms/batch latency and 219.31 samples/s throughput. Despite this overhead, all MobileNetV3 variants maintained substantially lower latency and higher throughput than ShuffleNetV2 (370.49 ms/batch, 172.75 samples/s) and MobileNetV2 (544.52 ms/batch, 117.53 samples/s).
 
-In terms of training convergence, the number of epochs required to reach peak validation accuracy varied considerably across variants (Table \ref{tab:performance-result}). Small CBAM r16 converged fastest at 15 minutes (17 epochs), while Large SE required the longest training at 54 minutes (44 epochs). Notably, CBAM r32 variants demanded more epochs than their SE counterparts—31 vs.\ 24 for Small, 31 vs.\ 44 for Large—due to the slower feature learning induced by aggressive channel compression. However, when measured by wall-clock time, Small CBAM r32 (26 min) was only modestly slower than Small SE (20 min), as the per-epoch cost of the CBAM modules was offset by the smaller parameter count.
+In terms of training convergence, the number of epochs required varied considerably across variants. MobileNetV3 Small + CBAM r16 converged fastest at 15 minutes (17 epochs), while Large SE required the longest training at 54 minutes (44 epochs). Notably, CBAM r32 variants demanded more epochs than their SE counterparts—31 vs.\ 24 for Small, 31 vs.\ 44 for Large—reflecting the slower feature learning induced by aggressive channel compression. However, when measured by wall-clock time, Small CBAM r32 (26 min) was only modestly slower than Small SE (20 min), as the per-epoch cost of CBAM was offset by the reduced parameter count (1.25M vs.\ 1.27M).
 
-Overall, CBAM integration presents a nuanced efficiency profile. It reduces parameter count and memory footprint, but introduces a CPU latency overhead and requires additional training epochs for r32 to converge. The choice between SE and CBAM therefore depends on the deployment priority: SE for fastest inference and simplest training, CBAM r32 for smallest memory when training budget permits additional epochs.
+Overall, CBAM integration presents a nuanced efficiency profile. It reduces parameter count and memory footprint, but introduces a CPU latency overhead and requires additional training epochs for r32 to converge. The choice between SE and CBAM therefore depends on the deployment priority: SE for fastest inference and simplest training convergence, CBAM r32 for smallest memory footprint when a moderate training budget is available.
 
 \subsection{Real-World Validation}
 
@@ -408,7 +408,7 @@ These findings underscore a critical challenge for attention-augmented lightweig
 
 \section{Conclusion}
 
-This study investigated the integration of CBAM into MobileNetV3 for fruit plant disease classification, evaluating its impact on performance and efficiency against common lightweight architectures. The findings reveal a nuanced relationship between attention mechanism, reduction ratio, and model size. MobileNetV3 Large with SE attention achieved the highest validation accuracy (99.25\%), surpassing both ShuffleNetV2 (98.98\%) and MobileNetV2 (98.66\%). Contrary to earlier assumptions, CBAM r32 did not inherently cause instability; when trained for a sufficient number of epochs, it reached competitive accuracy—98.72\% for the Small variant, exceeding the SE baseline—while achieving the lowest memory footprint of 4.76 MB. CBAM r16 consistently underperformed across both model sizes. The primary complexity benefit of CBAM lies in parameter and memory reduction (1.6--1.8\%), with negligible FLOPs impact. However, zero-shot validation on the PlantDoc dataset exposed severe domain shift sensitivity (0--7.29\% accuracy), confirming that efficiency gains on curated benchmarks do not guarantee field deployability. Future research should investigate domain adaptation strategies, mixed-dataset training, and stronger data augmentation to bridge the laboratory-to-field gap, and explore whether the r32 advantage on Small models generalizes to other lightweight architectures.
+This study investigated the integration of CBAM into MobileNetV3 for fruit plant disease classification, evaluating eight model variants across performance, complexity, and efficiency metrics. The test-set results reveal a nuanced picture. ShuffleNetV2 achieved the highest accuracy (99.21\%), while among MobileNetV3 variants, Large SE led at 98.97\%—only 0.10pp ahead of Large CBAM r32 (98.87\%). For the Small architecture, SE (98.75\%) and CBAM r32 (98.70\%) are statistically tied, yet CBAM r32 achieves this parity with fewer parameters and the smallest memory footprint of all evaluated models (4.76 MB). Analysis of training dynamics demonstrates that CBAM r32 is not inherently unstable; prior reports of instability stem from undertrained runs—given sufficient epochs (31 vs.\ 24 for Small SE), it converges reliably. In contrast, CBAM r16 consistently underperforms (97.75--98.45\%), suggesting that the larger attention bottleneck introduces redundancy rather than preserving signal. The primary contribution of CBAM lies in parameter and memory reduction (1.6--1.8\%) with negligible FLOPs impact, making it valuable for storage-constrained deployments. Zero-shot PlantDoc validation confirms severe domain shift sensitivity (0--7.29\%), underscoring that laboratory benchmarks alone are insufficient for evaluating field deployability. Future work should investigate domain adaptation techniques and explore whether these findings generalize to other lightweight backbones and attention variants.
 
 
  \bibliographystyle{elsarticle-num} 
