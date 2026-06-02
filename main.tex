@@ -378,19 +378,21 @@ Efficiency was evaluated using training time, testing time (inference), latency,
         \hline
         MobileNetV2 & 544.52 & 117.53 \\
         ShuffleNetV2 & 370.49 & 172.75 \\
-        Base Large (SE) & --- & --- \\
-        Base Large +CBAM r16 & --- & --- \\
-        Base Large +CBAM r32 & 291.82 & 219.31 \\
-        Base Small (SE) & 101.54 & 630.32 \\
-        Base Small +CBAM r16 & 192.06 & 333.23 \\
-        Base Small +CBAM r32 & 118.17 & 541.60 \\
+        Large SE & 292.51 & 218.80 \\
+        Large +CBAM r16 & 306.88 & 208.55 \\
+        Large +CBAM r32 & 291.82 & 219.31 \\
+        Small SE & 101.54 & 630.32 \\
+        Small +CBAM r16 & 192.06 & 333.23 \\
+        Small +CBAM r32 & 118.17 & 541.60 \\
         \hline
     \end{tabularx}
-    \caption{Efficiency Metrics (CPU) of evaluated models (Batch Size 64). Entries marked --- pending re-measurement on consistent hardware.}
+    \caption{Efficiency Metrics (CPU) of evaluated models (Batch Size 64).}
     \label{tab:efficiency-result}
 \end{table}
 
-Table \ref{tab:efficiency-result} presents CPU latency and throughput for all evaluated models. The MobileNetV3 Small baseline with SE achieved the lowest latency (101.54 ms/batch) and highest throughput (630.32 samples/s). CBAM integration introduced a measurable CPU overhead: for the Small variant, CBAM r32 increased latency to 118.17 ms/batch (a 16.4\% increase) and reduced throughput to 541.60 samples/s. The impact was more pronounced for CBAM r16 (latency 192.06 ms/batch, throughput 333.23 samples/s). For the Large variant, CBAM r32 recorded 291.82 ms/batch latency and 219.31 samples/s throughput. Despite this overhead, all MobileNetV3 variants maintained substantially lower latency and higher throughput than ShuffleNetV2 (370.49 ms/batch, 172.75 samples/s) and MobileNetV2 (544.52 ms/batch, 117.53 samples/s).
+Table \ref{tab:efficiency-result} presents CPU latency and throughput for all eight evaluated models. Among the Large variants, latency was tightly clustered: Large CBAM r32 achieved the lowest at 291.82 ms/batch, with Large SE at 292.51 ms/batch and Large CBAM r16 at 306.88 ms/batch. Throughput followed inversely, ranging from 208.55 to 219.31 samples/s. For the Small variants, the MobileNetV3 Small baseline with SE achieved a clear efficiency advantage—101.54 ms/batch latency and 630.32 samples/s throughput. CBAM integration introduced measurable CPU overhead on Small: CBAM r32 increased latency to 118.17 ms/batch (a 16.4\% increase) and reduced throughput to 541.60 samples/s, while CBAM r16 incurred the largest penalty at 192.06 ms/batch (89.1\% increase over SE). Despite this overhead, all MobileNetV3 variants maintained substantially lower latency and higher throughput than ShuffleNetV2 (370.49 ms/batch, 172.75 samples/s) and MobileNetV2 (544.52 ms/batch, 117.53 samples/s).
+
+The divergent efficiency patterns between Large and Small architectures are notable: on Large, CBAM r32 is marginally faster than SE on CPU, whereas on Small, SE holds a clear 16\% latency advantage. This suggests that the computational cost of CBAM's dual attention becomes proportionally more significant as the backbone shrinks, since the attention modules represent a larger fraction of total operations in the already-lean Small architecture.
 
 In terms of training convergence, the number of epochs required varied considerably across variants. MobileNetV3 Small + CBAM r16 converged fastest at 15 minutes (17 epochs), while Large SE required the longest training at 54 minutes (44 epochs). Notably, CBAM r32 variants demanded more epochs than their SE counterparts—31 vs.\ 24 for Small, 31 vs.\ 44 for Large—reflecting the slower feature learning induced by aggressive channel compression. However, when measured by wall-clock time, Small CBAM r32 (26 min) was only modestly slower than Small SE (20 min), as the per-epoch cost of CBAM was offset by the reduced parameter count (1.25M vs.\ 1.27M).
 
