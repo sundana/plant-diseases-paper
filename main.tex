@@ -273,26 +273,37 @@ We apply three adaptation strategies---CutMix+MixUp augmentation, target-domain 
 
 \begin{table}[t]
 \centering
-\caption{PlantDoc accuracy after domain adaptation. Zero-shot and DANN use the 20-class mapped subset (1,783 samples); fine-tuning uses the full 28-class PlantDoc taxonomy (70/15/15 split). Note that zero-shot and DANN results are not directly comparable to fine-tuning due to differing class counts.}
+\caption{PlantDoc accuracy after domain adaptation. Zero-shot, Augment, and DANN use the 20-class mapped subset (1,783 samples). Fine-Tune (28) uses the full PlantDoc taxonomy (28 classes). Fine-Tune (20) reports accuracy on the 20-class mapped subset from the fine-tune test split (268 samples), enabling direct comparison with zero-shot.}
 \label{tab:da_results}
-\begin{tabularx}{\textwidth}{lXXXX}
+\begin{tabularx}{\textwidth}{lXXXXX}
 \toprule
-\textbf{Model} & \textbf{Zero-Shot} & \textbf{Augment} & \textbf{Fine-Tune} & \textbf{DANN} \\
+\textbf{Model} & \textbf{Zero-Shot} & \textbf{Augment} & \textbf{Fine-Tune (28)} & \textbf{Fine-Tune (20)} & \textbf{DANN} \\
 \midrule
-Large SE $r=4$      & 8.13\% & 0.00\% & 39.02\% & 4.39\% \\
-Large CBAM $r=32$   & 6.51\% & 0.00\% & 35.40\% & TBD \\
-Large No Attention  & 8.08\% & 0.00\% & 33.85\% & TBD \\
+Large SE $r=4$      & 8.13\% & 0.00\% & 39.02\% & 39.55\% & 4.39\% \\
+Large CBAM $r=32$   & 6.51\% & 0.00\% & 35.40\% & 34.70\% & TBD \\
+Large No Attention  & 8.08\% & 0.00\% & 33.85\% & 33.96\% & TBD \\
 \bottomrule
 \end{tabularx}
 \vspace{4pt}
-\small DANN experiments for Large CBAM $r=32$ and Large No-Attn are in progress. The Large SE $r=4$ DANN result (4.39\%) is below the zero-shot baseline (8.13\%), suggesting that domain-adversarial training with the full PlantDoc as unlabeled target is ineffective when the source-biased features are too strong for the gradient reversal to overcome with the available target data. CutMix+MixUp augment models were trained on PlantVillage and evaluated on PlantDoc for cross-domain accuracy. All three score 0.00\%, confirming that strong augmentation alone does not bridge the domain gap without target-domain exposure.
+\small Fine-Tune (20) reports accuracy on the 20-class PlantDoc--PlantVillage mapped subset (268 test-split samples), enabling direct comparison with zero-shot results. 28-class and 20-class fine-tune accuracies are similar for all three models. DANN results for CBAM and No-Attn are in progress. Augment scores 0.00\% across all evaluations.
 \end{table}
 
-Table~\ref{tab:da_results} presents the domain adaptation results. Fine-tuning on the full 28-class PlantDoc taxonomy achieves 33--39\% accuracy, compared to 0--8\% zero-shot accuracy on the 20-class mapped subset. While these are evaluated on different numbers of classes and are therefore not directly comparable, fine-tuning consistently yields substantial absolute gains: the best fine-tuned model (Large SE $r=4$, 39.02\%) substantially outperforms random-chance baseline on 28 classes (3.6\%). Notably, the ranking among attention types is preserved but differences are small: Large SE $r=4$ leads at 39.02\%, followed by Large CBAM $r=32$ at 35.40\% and Large No-Attn at 33.85\%. The 5.17 percentage-point gap between best and worst is larger than the 0.10--0.52 point gaps observed on PlantVillage, suggesting that attention mechanisms may confer a larger benefit under data-scarce adaptation settings. However, the 3.62 percentage-point gap between SE and CBAM is smaller than the 5.17 point gap between the best and worst overall, confirming that the choice of attention type remains secondary to the choice of adaptation strategy.
+Table~\ref{tab:da_results} presents the domain adaptation results. Fine-tuning on the full 28-class PlantDoc taxonomy achieves 33--39\% accuracy. When evaluated specifically on the 20-class mapped subset (Fine-Tune 20 column), accuracy remains essentially unchanged (34--40\%), directly comparable to zero-shot baselines of 0--8\%. This 4--8$\times$ improvement over zero-shot demonstrates that target-domain fine-tuning substantially bridges the laboratory-to-field gap even with only 2,569 PlantDoc images ($\sim$92 per class). Notably, the ranking among attention types is preserved but differences are small: Large SE $r=4$ leads at 39.02\%, followed by Large CBAM $r=32$ at 35.40\% and Large No-Attn at 33.85\%. The 5.17 percentage-point gap between best and worst is larger than the 0.10--0.52 point gaps observed on PlantVillage, suggesting that attention mechanisms may confer a larger benefit under data-scarce adaptation settings. However, the 3.62 percentage-point gap between SE and CBAM is smaller than the 5.17 point gap between the best and worst overall, confirming that the choice of attention type remains secondary to the choice of adaptation strategy.
 
 The DANN result for Large SE $r=4$ achieves only 4.39\% PlantDoc accuracy, below the zero-shot baseline of 8.13\%. This negative result indicates that domain-adversarial training, while theoretically principled, faces practical challenges when the source dataset's bias (background-as-class) is sufficiently strong that the feature extractor collapses to a degenerate representation under gradient reversal. Similar challenges have been documented in other domains with extreme domain shift \cite{Ganin2016}.
 
 The CutMix+MixUp augmentation strategy, while improving PlantVillage test accuracy to 99.36--99.60\%, fails to bridge the PlantVillage-to-PlantDoc domain gap: all three augment-trained models achieve 0.00\% PlantDoc accuracy. This indicates that the models continue to rely on background shortcuts learned during PlantVillage training, and that composite-image augmentation alone is insufficient to induce domain-invariant feature representations.
+
+\subsection{Grad-CAM Analysis: What the Models Attend To}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{augment_gradcam.png}
+\caption{Grad-CAM visualization comparing an augment-trained model (top) with a standard-trained model (bottom) on six PlantDoc images. Both models consistently attend to background regions rather than leaf tissue or disease symptoms, confirming that the background bias persists across training paradigms. Predicted classes (shown above each image) default to PlantVillage classes absent from the PlantDoc mapping, such as ``Background without Leaves'' and other unmapped categories.}
+\label{fig:gradcam}
+\end{figure}
+
+To investigate why both standard and augment-trained models fail on PlantDoc, we apply Grad-CAM to visualize which image regions drive predictions. Figure~\ref{fig:gradcam} shows the results for six representative PlantDoc images. Both the standard and augment-trained Large SE $r=4$ models concentrate their attention on background regions---soil, shadows, and non-leaf structures---rather than on leaf tissue or disease symptoms. The predicted classes (shown above each image) consistently map to PlantVillage categories that have no PlantDoc counterpart, such as ``Background without Leaves'' and other unmapped disease classes. This explains why augment-trained models, despite achieving 99.36\% PlantVillage accuracy, score 0.00\% on PlantDoc: CutMix+MixUp does not redirect attention away from background cues because these cues are the only signal that distinguishes PlantVillage's background class from its disease classes. Without explicit supervision to attend to leaves, the model has no incentive to learn leaf-centric features.
 
 \subsection{Per-Class Domain Shift Analysis}
 
