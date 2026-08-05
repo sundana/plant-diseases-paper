@@ -9,6 +9,8 @@
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{booktabs}
+\usepackage{siunitx}
+\sisetup{table-format=2.2, table-number-alignment=center, table-column-width=0pt}
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc}
 
@@ -52,9 +54,9 @@ plant disease classification \sep domain adaptation \sep MobileNetV3 \sep CBAM \
 \section{Introduction}
 \label{sec:intro}
 
-Global food security depends on effective plant disease management, yet manual diagnosis by agronomists remains slow, expensive, and unavailable in many regions \cite{Sajitha2024, Wang2024}. Deep learning-based image classification has emerged as a promising solution, with convolutional neural networks (CNNs) consistently exceeding 90\% accuracy on benchmark datasets such as PlantVillage \cite{Vishnoi2023, Pandian2022, Syed-Ab-Rahman2022}. However, these near-perfect results obscure a critical limitation: PlantVillage images are captured under controlled laboratory conditions with uniform backgrounds and centered single leaves, conditions that bear little resemblance to the complex, cluttered environments of real agricultural fields \cite{Pandian2022, Liu2023}.
+Global food security depends on effective plant disease management, yet manual diagnosis by agronomists remains slow, expensive, and unavailable in many regions \cite{Sajitha2024, Wang2024}. Deep learning-based image classification has emerged as a promising solution, with CNNs consistently exceeding 90\% accuracy on benchmarks such as PlantVillage \cite{Vishnoi2023, Pandian2022, Syed-Ab-Rahman2022}. However, PlantVillage images are captured under controlled laboratory conditions with uniform backgrounds and centered single leaves—conditions that bear little resemblance to real agricultural fields \cite{Pandian2022, Liu2023}.
 
-This laboratory-to-field domain gap is well-documented in computer vision but remains underexplored in plant disease classification. Models that achieve 99\% accuracy on PlantVillage may fail catastrophically when confronted with field images featuring variable lighting, overlapping foliage, diverse backgrounds, and sensor noise \cite{Lu2025}. Despite this, much of the recent literature focuses on architectural micro-optimizations—often reporting accuracy improvements of a fraction of a percentage point on PlantVillage—while neglecting whether these improvements transfer to realistic deployment scenarios.
+This laboratory-to-field domain gap is well-documented in computer vision but underexplored in plant disease classification. Models achieving 99\% accuracy on PlantVillage may fail catastrophically on field images with variable lighting, overlapping foliage, and sensor noise \cite{Lu2025}. Despite this, recent literature focuses on architectural micro-optimizations, often reporting sub-percentage accuracy improvements on PlantVillage while neglecting whether these improvements transfer to realistic deployment scenarios.
 
 In this work, we systematically investigate the interaction between attention mechanisms, lightweight architectures, and domain shift for plant disease classification. We evaluate three attention variants—Squeeze-and-Excitation (SE) \cite{Hu2018}, Convolutional Block Attention Module (CBAM) \cite{Woo2018}, and no attention—within MobileNetV3 Large and Small backbones, benchmarking against MobileNetV2 and ShuffleNetV2. Our contributions are:
 
@@ -75,11 +77,11 @@ Deploying CNNs on resource-constrained edge devices has motivated lightweight ar
 
 \subsection{Attention Mechanisms}
 
-Channel attention, pioneered by the SE module, recalibrates feature maps by modeling inter-channel dependencies. CBAM \cite{Woo2018} extended this by sequentially applying channel and spatial attention, using both average-pooling and max-pooling. While CBAM has shown benefits in tasks including object detection \cite{Zhang2022_lettuce} and medical imaging, its effectiveness relative to SE in lightweight architectures for fine-grained classification has not been rigorously studied. Notably, most comparisons between SE and CBAM in the literature evaluate them at different compression ratios, confounding the attention mechanism with the compression level. Other efficient attention variants such as ECA-Net and Coordinate Attention have been proposed but SE and CBAM remain the most widely adopted baselines.
+Channel attention, pioneered by the SE module \cite{Hu2018}, recalibrates feature maps by modeling inter-channel dependencies. CBAM \cite{Woo2018} extended this by sequentially applying channel and spatial attention. While CBAM has shown benefits in object detection \cite{Zhang2022_lettuce} and medical imaging, its effectiveness relative to SE in lightweight architectures for fine-grained classification has not been rigorously studied. Notably, most SE--CBAM comparisons in the literature evaluate them at different compression ratios, confounding the attention mechanism with the compression level.
 
 \subsection{Domain Adaptation and Domain Shift}
 
-Domain shift, the mismatch between training and deployment data distributions, poses a fundamental challenge for real-world deployment of deep learning models. In agriculture, this manifests as laboratory-trained models failing on field images \cite{Liu2023}. Domain adaptation techniques address this gap: adversarial methods such as DANN \cite{Ganin2016} employ gradient reversal to learn domain-invariant features; data augmentation strategies such as CutMix and MixUp increase training diversity to improve generalization; and fine-tuning on a small amount of target-domain data can rapidly adapt pre-trained models. Despite their demonstrated effectiveness in other domains, systematic evaluation of these techniques for plant disease classification remains rare. We evaluate fine-tuning and augmentation here; DANN experiments are deferred to future work.
+Domain shift, the mismatch between training and deployment data distributions, is a fundamental challenge for real-world deployment. Domain adaptation techniques address this gap: adversarial methods such as DANN \cite{Ganin2016} learn domain-invariant features via gradient reversal; CutMix and MixUp increase training diversity; and fine-tuning on a small amount of target-domain data can rapidly adapt pre-trained models. Systematic evaluation of these techniques for plant disease classification remains rare. We evaluate fine-tuning, augmentation, and DANN (for one model) here.
 
 \subsection{Plant Disease Benchmarks}
 
@@ -154,7 +156,7 @@ Figure \ref{fig:workflow} illustrates the overall experimental pipeline. We firs
 
 \subsubsection{PlantVillage (Source Domain)}
 
-We use 29 fruit-plant disease and healthy classes from the PlantVillage dataset (46,565 images total): apple (4 classes), blueberry (1), cherry (2), grape (4), orange (1), peach (2), raspberry (1), squash (1), strawberry (2), tomato (10), and one background-without-leaves class. The dataset is split 70/15/15 (train/validation/test) with stratified sampling (seed=42). Images are resized to $224\times224$ and normalized with ImageNet statistics ($\mu=[0.485,0.456,0.406]$, $\sigma=[0.229,0.224,0.225]$). Training augmentations include RandomResizedCrop, RandomHorizontalFlip, RandomRotation($15^\circ$), and ColorJitter($\pm0.2$).
+We use 29 classes from the PlantVillage dataset (46,565 images): apple (4), blueberry (1), cherry (2), grape (4), orange (1), peach (2), raspberry (1), squash (1), strawberry (2), tomato (10), and one background-without-leaves class. The dataset is split 70/15/15 (train/validation/test) with stratified sampling (seed=42). Images are resized to $224\times224$ and normalized with ImageNet statistics ($\mu=[0.485,0.456,0.406]$, $\sigma=[0.229,0.224,0.225]$). Training augmentations: RandomResizedCrop, RandomHorizontalFlip, RandomRotation($15^\circ$), and ColorJitter($\pm0.2$).
 
 \subsubsection{PlantDoc (Target Domain)}
 
@@ -172,12 +174,12 @@ We evaluate 17 model variants spanning three attention types (SE, CBAM, None) at
     \item \textbf{Baselines:} MobileNetV2, ShuffleNetV2, and EfficientNet-B0 (torchvision implementations).
 \end{itemize}
 
-All MobileNetV3 variants maintain the same inverted residual block structure; only the attention module inside SE-designated blocks differs. For Small architectures, the first attention block (channel=16) uses a fallback reduction of $r=16$ when $r=32$ would produce a zero-channel bottleneck, a detail explicitly disclosed here for reproducibility.
+All MobileNetV3 variants maintain the same inverted residual block structure; only the attention module differs. For Small architectures, the first attention block (channel=16) uses $r=16$ fallback when $r=32$ would create a zero-channel bottleneck.
 
 \subsection{Standard Training Protocol}
 \label{sec:pv_training}
 
-All models are trained from scratch on PlantVillage using Adam optimizer ($\eta=0.001$), Cross Entropy Loss, batch size 64, and early stopping with patience 5 on validation loss. Training uses stratified 70/15/15 splits with fixed seed (42) for reproducibility. Results in Table~\ref{tab:pv_results} are reported from a single stratified split. For statistical comparisons between model pairs, we use McNemar's test and bootstrap confidence intervals ($n=10{,}000$ resamples, $\alpha=0.05$) computed on the 6,985-sample hold-out test set.
+All models are trained from scratch on PlantVillage using Adam ($\eta=0.001$), Cross Entropy Loss, batch size 64, and early stopping (patience 5). A stratified 70/15/15 split with seed 42 is used. Table~\ref{tab:pv_results} reports single-split test accuracy. Statistical comparisons use McNemar's test and bootstrap confidence intervals ($n=10{,}000$, $\alpha=0.05$) on the 6,985-sample test set.
 
 \subsection{Complexity Measurement}
 
@@ -190,7 +192,7 @@ We evaluate two complementary strategies:
 
 \subsubsection{Strong Data Augmentation (CutMix + MixUp)}
 
-CutMix replaces rectangular regions of one image with patches from another, while MixUp performs convex combinations of image pairs and their labels. We apply both with probability 0.5 per batch and $\alpha=1.0$. Training otherwise follows the standard PlantVillage protocol. Our hypothesis was that exposing the model to composite images during training would reduce overfitting to clean-background cues; however, the results show this strategy does not generalize across domains (see Section~\ref{sec:da_results}).
+We apply CutMix and MixUp with probability 0.5 per batch and $\alpha=1.0$, following the standard PlantVillage training protocol otherwise.
 
 \subsubsection{Target-Domain Fine-Tuning}
 
@@ -215,9 +217,9 @@ To characterize the failure mode of zero-shot transfer, we analyze prediction di
 \toprule
 \textbf{Model} & \textbf{Acc. (\%)} & \textbf{Params (M)} & \textbf{Mem. (MB)} \\
 \midrule
-ShuffleNetV2 & \textbf{99.12}$\pm$0.07 & 1.28 & 4.90 \\
+ShuffleNetV2 & 99.12$\pm$0.07 & 1.28 & 4.90 \\
 MobileNetV2 & 99.16 & 2.26 & 8.63 \\
-EfficientNet-B0 & 99.38 & 4.04 & 15.43 \\
+EfficientNet-B0 & \textbf{99.38} & 4.04 & 15.43 \\
 \addlinespace
 \multicolumn{4}{l}{\textit{MobileNetV3 Large}} \\
 \quad SE $r=4$ & 98.97 & 2.71 & 10.35 \\
@@ -242,7 +244,7 @@ EfficientNet-B0 & 99.38 & 4.04 & 15.43 \\
 \small Note: At equal $r$, SE and CBAM have near-identical parameter counts (e.g., Large SE $r=16$ = 2,671,625 vs.\ Large CBAM $r=16$ = 2,670,661; difference $<$0.04\%), demonstrating that prior claims of CBAM parameter efficiency are artifacts of unequal compression ratios. Parameter and memory values in the table are rounded to two decimal places; the bold annotation marks the lowest raw value where differences exceed rounding precision.
 \end{table}
 
-Table \ref{tab:pv_results} presents PlantVillage performance and complexity. ShuffleNetV2 achieves the highest accuracy (99.12\% mean over three seeds, $\pm$0.07), followed by EfficientNet-B0 (99.38\%). Despite its substantially larger footprint (4.04M parameters, 408.95 M FLOPs vs.\ 266.73 M for Large SE $r=4$), EfficientNet-B0 does not outperform the best lightweight variant by a meaningful margin, and, critically, its zero-shot PlantDoc accuracy is 0.00\% (Table~\ref{tab:plantdoc_zeroshot}), confirming that higher in-domain capacity does not mitigate the background bias. Among MobileNetV3 variants, Large SE ($r=4$) leads at 98.97\%, followed by Large CBAM $r=32$ (98.87\%) and Small SE $r=32$ (98.84\%). The no-attention Large variant trails at 96.85\%, a 2.12 percentage-point gap from the best attention-equipped variant, confirming that attention modules provide a measurable benefit on PlantVillage. However, among models equipped with attention, the spread is narrow: the top seven attention-equipped variants (98.45--98.97\%) span only 0.52 percentage points, and pairwise differences among the top three (0.10--0.13 points) are well within single-split variance. The key complexity finding is that, at equal reduction ratios, SE and CBAM have near-identical parameter counts: Large SE $r=16$ = 2,671,625 vs.\ Large CBAM $r=16$ = 2,670,661 (difference of 964 parameters, $<0.04\%$). The previously reported parameter advantage of CBAM over SE was entirely an artifact of comparing SE at $r=4$ with CBAM at $r=16$ or $r=32$. The no-attention baseline achieves the lowest memory footprint (10.13 MB for Large, 4.75 MB for Small), confirming that attention modules increase memory overhead by 0.2--0.6 MB per variant.
+Table \ref{tab:pv_results} presents PlantVillage performance and complexity. EfficientNet-B0 achieves the highest accuracy (99.38\%), followed by MobileNetV2 (99.16\%) and ShuffleNetV2 (99.12\%, $\pm$0.07 over three seeds). Despite 4.04M parameters and 408.95 M FLOPs (vs.\ 266.73 M for Large SE $r=4$), EfficientNet-B0 offers no meaningful in-domain advantage and scores 0.00\% on PlantDoc (Table~\ref{tab:plantdoc_zeroshot}), confirming that higher capacity does not mitigate the background bias. Among MobileNetV3 variants, Large SE ($r=4$) leads at 98.97\%, followed by Large CBAM $r=32$ (98.87\%) and Small SE $r=32$ (98.84\%). The no-attention Large variant trails at 96.85\%, confirming that attention provides measurable benefit on PlantVillage. However, the top seven attention-equipped variants span only 0.52 points (98.45--98.97\%), with pairwise differences among the top three well within single-split variance. At equal reduction ratios, SE and CBAM have near-identical parameter counts (e.g., Large SE $r=16$ = 2,671,625 vs.\ CBAM = 2,670,661; $<$0.04\% difference), confirming that previously reported CBAM efficiency advantages are artifacts of unequal comparison. The no-attention baseline achieves the lowest memory footprint for both Large (10.13 MB) and Small (4.75 MB), an overhead of 0.2--0.6 MB attributable to attention modules.
 
 \subsection{Complexity Analysis at Equal Reduction Ratios}
 
@@ -281,71 +283,69 @@ Table \ref{tab:equal_r} confirms that when SE and CBAM are compared at the same 
 \centering
 \caption{Zero-shot PlantDoc accuracy (mapped 20-class subset, 1,783 samples). Models trained on PlantVillage, evaluated on PlantDoc without adaptation.}
 \label{tab:plantdoc_zeroshot}
-\begin{tabularx}{\textwidth}{lX}
+\begin{tabular}{l l r S}
 \toprule
-\textbf{Model} & \textbf{Accuracy (\%)} \\
+\textbf{Backbone} & \textbf{Attention} & \textbf{$r$} & \textbf{Acc.\ (\%)} \\
 \midrule
-\multicolumn{2}{l}{\textit{Baselines}} \\
-\quad ShuffleNetV2 & 6.51 \\
-\quad MobileNetV2 & 7.29 \\
-\quad EfficientNet-B0 & 0.00 \\
+\multicolumn{4}{l}{\textbf{Baselines}} \\
+ShuffleNetV2   & --- & --- & 6.51 \\
+MobileNetV2    & --- & --- & 7.29 \\
+EfficientNet-B0 & --- & --- & 0.00 \\
 \addlinespace
-\multicolumn{2}{l}{\textit{MobileNetV3 Large}} \\
-\quad SE $r=4$   & 8.13 \\
-\quad CBAM $r=4$ & 0.00 \\
-\quad SE $r=16$  & 6.23 \\
-\quad SE $r=32$  & 5.38 \\
-\quad CBAM $r=16$ & 7.91 \\
-\quad CBAM $r=32$ & 6.51 \\
-\quad No attention & 8.08 \\
+\multicolumn{4}{l}{\textbf{MobileNetV3 Large}} \\
+& SE   & 4  & 8.13 \\
+& CBAM & 4  & 0.00 \\
+& SE   & 16 & 6.23 \\
+& SE   & 32 & 5.38 \\
+& CBAM & 16 & 7.91 \\
+& CBAM & 32 & 6.51 \\
+& None & --- & 8.08 \\
 \addlinespace
-\multicolumn{2}{l}{\textit{MobileNetV3 Small}} \\
-\quad SE $r=4$   & 5.38 \\
-\quad CBAM $r=4$ & 0.00 \\
-\quad SE $r=16$  & 7.74 \\
-\quad SE $r=32$  & 6.90 \\
-\quad CBAM $r=16$ & 7.29 \\
-\quad CBAM $r=32$ & 7.12 \\
-\quad No attention & 5.38 \\
+\multicolumn{4}{l}{\textbf{MobileNetV3 Small}} \\
+& SE   & 4  & 5.38 \\
+& CBAM & 4  & 0.00 \\
+& SE   & 16 & 7.74 \\
+& SE   & 32 & 6.90 \\
+& CBAM & 16 & 7.29 \\
+& CBAM & 32 & 7.12 \\
+& None & --- & 5.38 \\
 \bottomrule
-\end{tabularx}
+\end{tabular}
 \end{table}
 
-Table \ref{tab:plantdoc_zeroshot} and Figure \ref{fig:plantdoc_preds} reveal the severity of the domain gap. Most models achieve only 5--8\% accuracy on PlantDoc, dramatically below their $\sim$99\% PlantVillage performance; two CBAM $r=4$ variants degrade catastrophically to 0.00\%, predicting entirely on unmapped PlantVillage classes. The dominant failure mode is consistent across architectures. For three representative models, we quantify the prediction distribution: Large SE $r=4$ allocates 51.0\% of predictions to unmapped PlantVillage classes (28.5\% to ``Background without Leaves'' alone); Large CBAM $r=16$ allocates 48.5\% to unmapped classes (22.8\% to the background class); Small SE $r=4$ allocates 69.5\% to unmapped classes (36.5\% to the background class). In PlantVillage, the background class is the only class featuring varied, non-uniform backgrounds; every disease and healthy class has images with clean, solid-colored backgrounds. The models have therefore learned a spurious shortcut: complex natural background $\rightarrow$ ``Background without Leaves.'' This finding demonstrates that near-perfect PlantVillage accuracy primarily reflects exploitation of dataset-specific cues rather than robust disease-feature recognition.
+Table \ref{tab:plantdoc_zeroshot} and Figure \ref{fig:plantdoc_preds} quantify the domain gap. Most models achieve 5--8\% accuracy, dramatically below $\sim$99\% on PlantVillage; CBAM $r=4$ variants and EfficientNet-B0 degrade to 0.00\%, predicting entirely on unmapped classes. The failure mode is consistent: models learn a spurious shortcut. For three representative models, 48.5--69.5\% of predictions fall on unmapped PlantVillage classes, with the ``Background without Leaves'' class alone absorbing 22.8--36.5\%. This class is unique in PlantVillage in featuring non-uniform backgrounds; every disease and healthy class has solid-colored backgrounds. The models have therefore learned to map complex natural background $\rightarrow$ ``Background without Leaves,'' exploiting dataset-specific cues rather than disease features.
 
-Among the 16 models evaluated, zero-shot accuracy of most models clusters between 5.38\% and 8.13\%, while CBAM $r=4$ variants (both Large and Small) and EfficientNet-B0 score 0.00\%, their predictions falling entirely on unmapped PlantVillage classes. The EfficientNet-B0 result is particularly striking: despite 408.95 M FLOPs and 99.38\% PlantVillage accuracy, substantially more capacity than any MobileNetV3 variant, it achieves zero cross-domain accuracy. This confirms that the background bias is a dataset property, not an artifact of model size, and that improving in-domain capacity does not resolve shortcut learning \cite{Geirhos2020}. The $r=4$ compression ratio severely constrains CBAM's channel attention branch, squeezing a $C=960$ channel tensor (in the final attention block) to only 240 dimensions, which, combined with the additional spatial attention pathway, likely strips the module of sufficient representational capacity to learn disease-specific features during PlantVillage training. Indeed, CBAM $r=4$ models exhibit the lowest PlantVillage test accuracy among all attention-equipped variants on both Large and Small architectures (Table~\ref{tab:pv_results}), confirming that this compression level is excessively aggressive for CBAM. Per-class analysis for the Large SE $r=4$ model shows that two classes transfer best: Tomato Late Blight (28.8\%) and Apple Scab (14.0\%), while three healthy-leaf classes (Cherry, Peach, Raspberry) score 0.0\%, as the model cannot discriminate among visually similar healthy leaves from different species without background cues. The full per-class breakdown is provided in Figure~\ref{fig:plantdoc_preds}.
+The EfficientNet-B0 result confirms this is a dataset property, not a capacity limitation: 408.95 M FLOPs and 99.38\% PlantVillage accuracy confer zero cross-domain advantage. The $r=4$ compression severely constrains CBAM's channel attention, squeezing $C=960$ to 240 dimensions; combined with the spatial attention pathway, this strips sufficient capacity to learn disease-specific features during PlantVillage training. CBAM $r=4$ models exhibit the lowest PV accuracy on both Large and Small architectures (Table~\ref{tab:pv_results}). Per-class analysis for Large SE $r=4$ shows Tomato Late Blight (28.8\%) and Apple Scab (14.0\%) transfer best, while healthy-leaf classes (Cherry, Peach, Raspberry) score 0.0\%, unable to discriminate without background cues. The full breakdown is in Figure~\ref{fig:plantdoc_preds}.
 
 \subsection{Statistical Significance of PlantVillage Comparisons}
 
-To assess whether the small accuracy differences among top-performing models on PlantVillage are reliable, we apply bootstrap resampling ($n=10{,}000$) and McNemar's test. The top three models, ShuffleNetV2 (99.21\%), MobileNetV2 (99.16\%), and Large SE $r=4$ (98.97\%), differ by 0.05--0.24 percentage points. With 6,985 test samples, bootstrap 95\% confidence intervals for each model span approximately $\pm$0.25 percentage points, exceeding the pairwise differences. McNemar's test yields $p > 0.05$ for all three pairwise comparisons among these models (ShuffleNetV2 vs.\ MobileNetV2: $p=0.32$, MobileNetV2 vs.\ Large SE: $p=0.08$, ShuffleNetV2 vs.\ Large SE: $p=0.04$). While the ShuffleNetV2 vs.\ Large SE comparison approaches significance, the absolute accuracy gap (0.24 points) is smaller than the estimated confidence interval width. These results confirm that PlantVillage is a saturated benchmark on which single-split accuracy differences below $\sim$0.5 percentage points are not statistically meaningful.
+To assess whether the small accuracy differences among top-performing lightweight models on PlantVillage are reliable, we apply bootstrap resampling ($n=10{,}000$) and McNemar's test to the three highest-accuracy models from Table~\ref{tab:pv_results} excluding EfficientNet-B0: ShuffleNetV2 (99.12\%), MobileNetV2 (99.16\%), and Large SE $r=4$ (98.97\%). With 6,985 test samples, bootstrap 95\% confidence intervals for each model span approximately $\pm$0.25 percentage points, exceeding the pairwise differences. McNemar's test yields $p > 0.05$ for all three pairwise comparisons among these models (ShuffleNetV2 vs.\ MobileNetV2: $p=0.32$, MobileNetV2 vs.\ Large SE: $p=0.08$, ShuffleNetV2 vs.\ Large SE: $p=0.04$). While the ShuffleNetV2 vs.\ Large SE comparison approaches significance, the absolute accuracy gap (0.24 points) is smaller than the estimated confidence interval width. These results confirm that PlantVillage is a saturated benchmark on which single-split accuracy differences below $\sim$0.5 percentage points are not statistically meaningful.
 
 \subsection{Domain Adaptation Results}
 \label{sec:da_results}
 
-We apply three adaptation strategies, CutMix+MixUp augmentation, target-domain fine-tuning, and Domain-Adversarial Neural Network (DANN), to three representative models: Large SE $r=4$, Large CBAM $r=32$, and Large No-Attn. These three span the attention spectrum (SE, CBAM, none) and represent the best-performing variant of each type.
+We apply two adaptation strategies, CutMix+MixUp augmentation and target-domain fine-tuning, to three representative models: Large SE $r=4$, Large CBAM $r=32$, and Large No-Attn. These three span the attention spectrum (SE, CBAM, none) and represent the best-performing variant of each type. Domain-Adversarial Neural Network (DANN) training was additionally evaluated for Large SE $r=4$ and is discussed in the text below.
 
 \begin{table}[t]
 \centering
-\caption{PlantDoc accuracy after domain adaptation. Zero-shot, Augment, and DANN use the 20-class mapped subset (1,783 samples). Fine-Tune (28) uses the full PlantDoc taxonomy (28 classes). Fine-Tune (20) reports accuracy on the 20-class mapped subset from the fine-tune test split (268 samples), enabling direct comparison with zero-shot.}
+\caption{PlantDoc accuracy after domain adaptation. Zero-shot and Augment use the 20-class mapped subset (1,783 samples). Fine-Tune (28) uses the full PlantDoc taxonomy (28 classes). Fine-Tune (20) reports accuracy on the 20-class mapped subset from the fine-tune test split (268 samples), enabling direct comparison with zero-shot.}
 \label{tab:da_results}
-\begin{tabularx}{\textwidth}{lXXXXX}
+\begin{tabularx}{\textwidth}{lXXXX}
 \toprule
-\textbf{Model} & \textbf{Zero-Shot} & \textbf{Augment} & \textbf{Fine-Tune (28)} & \textbf{Fine-Tune (20)} & \textbf{DANN} \\
+\textbf{Model} & \textbf{Zero-Shot} & \textbf{Augment} & \textbf{Fine-Tune (28)} & \textbf{Fine-Tune (20)} \\
 \midrule
-Large SE $r=4$      & 8.13\% & 0.00\% & 39.02\% & 39.55\% & 4.39\% \\
-Large CBAM $r=32$   & 6.51\% & 0.00\% & 35.40\% & 34.70\% & TBD \\
-Large No Attention  & 8.08\% & 0.00\% & 33.85\% & 33.96\% & TBD \\
+Large SE $r=4$      & 8.13\% & 0.00\% & 39.02\% & 39.55\% \\
+Large CBAM $r=32$   & 6.51\% & 0.00\% & 35.40\% & 34.70\% \\
+Large No Attention  & 8.08\% & 0.00\% & 33.85\% & 33.96\% \\
 \bottomrule
 \end{tabularx}
 \vspace{4pt}
-\small Fine-Tune (20) reports accuracy on the 20-class PlantDoc--PlantVillage mapped subset (268 test-split samples), enabling direct comparison with zero-shot results. 28-class and 20-class fine-tune accuracies are similar for all three models. DANN results for CBAM and No-Attn are in progress. Augment scores 0.00\% across all evaluations.
+\small Fine-Tune (20) reports accuracy on the 20-class PlantDoc--PlantVillage mapped subset (268 test-split samples), enabling direct comparison with zero-shot results. 28-class and 20-class fine-tune accuracies are similar for all three models. Augment scores 0.00\% across all evaluations.
 \end{table}
 
-Table~\ref{tab:da_results} presents the domain adaptation results. Fine-tuning on the full 28-class PlantDoc taxonomy achieves 33--39\% accuracy. When evaluated specifically on the 20-class mapped subset (Fine-Tune 20 column), accuracy remains essentially unchanged (34--40\%), directly comparable to zero-shot baselines of 0--8\%. This 4--8$\times$ improvement over zero-shot demonstrates that target-domain fine-tuning substantially bridges the laboratory-to-field gap even with only 2,569 PlantDoc images ($\sim$92 per class). Notably, the ranking among attention types is preserved but differences are small: Large SE $r=4$ leads at 39.02\%, followed by Large CBAM $r=32$ at 35.40\% and Large No-Attn at 33.85\%. The 5.17 percentage-point gap between best and worst is larger than the 0.10--0.52 point gaps observed on PlantVillage, suggesting that attention mechanisms may confer a larger benefit under data-scarce adaptation settings. However, the 3.62 percentage-point gap between SE and CBAM is smaller than the 5.17 point gap between the best and worst overall, confirming that the choice of attention type remains secondary to the choice of adaptation strategy.
+Table~\ref{tab:da_results} presents the domain adaptation results. Fine-tuning on the 20-class mapped subset achieves 34--40\%, a substantial improvement over 0--8\% zero-shot baselines. The ranking among attention types is preserved: Large SE $r=4$ leads at 39.55\%, followed by Large CBAM $r=32$ at 34.70\%, then Large No-Attn at 33.96\%. The 3.62 point SE--CBAM gap is smaller than the 5.17 point range across all three models, confirming that adaptation strategy dominates attention choice.
 
-The DANN result for Large SE $r=4$ achieves only 4.39\% PlantDoc accuracy, below the zero-shot baseline of 8.13\%. This negative result indicates that domain-adversarial training, while theoretically principled, faces practical challenges when the source dataset's bias (background-as-class) is sufficiently strong that the feature extractor collapses to a degenerate representation under gradient reversal. Similar challenges have been documented in other domains with extreme domain shift \cite{Ganin2016}.
-
-The CutMix+MixUp augmentation strategy, while improving PlantVillage test accuracy to 99.36--99.60\%, fails to bridge the PlantVillage-to-PlantDoc domain gap: all three augment-trained models achieve 0.00\% PlantDoc accuracy. This indicates that the models continue to rely on background shortcuts learned during PlantVillage training, and that composite-image augmentation alone is insufficient to induce domain-invariant feature representations.
+In contrast, CutMix+MixUp augmentation scores 0.00\% on PlantDoc despite lifting PlantVillage accuracy to 99.36--99.60\%, and DANN for Large SE $r=4$ achieves only 4.39\%, below its zero-shot baseline (8.13\%). Both failures highlight that standard DA techniques falter when the source model has learned a degenerate shortcut rather than merely distribution-shifted features \cite{Ganin2016}.
 
 \subsection{Grad-CAM Analysis: What the Models Attend To}
 
@@ -356,7 +356,7 @@ The CutMix+MixUp augmentation strategy, while improving PlantVillage test accura
 \label{fig:gradcam}
 \end{figure}
 
-To investigate why both standard and augment-trained models fail on PlantDoc, we apply Grad-CAM to visualize which image regions drive predictions. Figure~\ref{fig:gradcam} shows the results for six representative PlantDoc images. Both the standard and augment-trained Large SE $r=4$ models concentrate their attention on background regions (soil, shadows, and non-leaf structures) rather than on leaf tissue or disease symptoms. The predicted classes (shown above each image) consistently map to PlantVillage categories that have no PlantDoc counterpart, such as ``Background without Leaves'' and other unmapped disease classes. This explains why augment-trained models, despite achieving 99.36\% PlantVillage accuracy, score 0.00\% on PlantDoc: CutMix+MixUp does not redirect attention away from background cues because these cues are the only signal that distinguishes PlantVillage's background class from its disease classes. Without explicit supervision to attend to leaves, the model has no incentive to learn leaf-centric features.
+To investigate why both standard and augment-trained models fail, we apply Grad-CAM to visualize prediction-driving image regions (Figure~\ref{fig:gradcam}). Both the standard and augment-trained Large SE $r=4$ models attend to background regions (soil, shadows, non-leaf structures) rather than leaf tissue or disease symptoms, and their predictions default to PlantVillage classes absent from PlantDoc. This explains why augment-trained models score 0.00\% despite 99.36\% PlantVillage accuracy: CutMix+MixUp does not redirect attention away from background cues, because these cues are the only signal distinguishing PlantVillage's background class from its disease classes. Without explicit supervision to attend to leaves, the model has no incentive to learn leaf-centric features.
 
 \subsection{Per-Class Domain Shift Analysis}
 
@@ -403,31 +403,27 @@ We analyze per-class accuracy degradation between PlantVillage and PlantDoc for 
 
 \subsection{The Background Bias: A Widespread but Undocumented Problem}
 
-Our finding that PlantVillage-trained models systematically predict ``Background without Leaves'' on field images reveals a dataset bias that, while logically predictable, has not been quantitatively documented in prior work. The PlantVillage dataset design, in which all disease classes have uniform backgrounds while only the background class features varied backgrounds, creates a confound that lightweight models readily exploit. This is an instance of the broader phenomenon of shortcut learning in deep neural networks \cite{Geirhos2020}, where models learn simple decision rules from spurious correlations rather than task-relevant features. This bias is particularly insidious because it inflates PlantVillage accuracy without improving (and likely harming) real-world generalization.
-
-This finding has implications beyond our specific experiments. Any study reporting PlantVillage accuracy above $\sim$97\% without accompanying field validation should be interpreted cautiously: the residual error may reflect genuine disease-feature recognition, but it may equally reflect the exploitation of dataset-specific shortcuts.
+PlantVillage-trained models systematically predict ``Background without Leaves'' on field images because the dataset design—uniform backgrounds for disease classes, varied backgrounds only for the background class—creates a confound that models readily exploit. This is an instance of shortcut learning \cite{Geirhos2020}, where models learn spurious correlations rather than task-relevant features. Any study reporting PlantVillage accuracy above $\sim$97\% without field validation should be interpreted cautiously.
 
 \subsection{Attention Mechanisms: Distinction Without a Difference?}
 
-Our fair-comparison analysis (equal reduction ratios) demonstrates that SE and CBAM are functionally equivalent in terms of both accuracy and complexity for this task. The 0.05--0.52 percentage point accuracy differences between SE and CBAM at the same $r$ are smaller than single-split variance and are unlikely to survive cross-validation. The no-attention Large variant achieves 96.85\%, a 2.12 percentage-point gap below the best attention-equipped variant, confirming that attention mechanisms have practical value on PlantVillage, but the choice among attention types is largely irrelevant. A notable exception is the Small CBAM $r=4$ variant, whose accuracy (97.71\%) trails Small No-Attn (98.51\%) by 0.80 percentage points, likely because the limited channel capacity in Small architectures makes $r=4$ excessively restrictive for CBAM's dual-attention design.
-
-This result does not imply that attention mechanisms are useless; rather, it suggests that for fine-grained classification on saturated benchmarks with controlled imaging conditions, the choice of attention mechanism is a second-order effect. The first-order effect, which architecture and training paradigm to use, has already been largely optimized. The remaining variance is dominated by dataset artifacts.
+At equal reduction ratios, SE and CBAM are functionally equivalent in accuracy and complexity. The 0.05--0.52 point differences between SE and CBAM at the same $r$ are unlikely to survive cross-validation. The no-attention Large variant (96.85\%) trails the best attention-equipped variant by 2.12 points, confirming that attention has practical value; however, the choice among attention types is irrelevant. A notable exception is Small CBAM $r=4$ (97.71\%), which trails Small No-Attn (98.51\%) by 0.80 points, likely because $r=4$ is excessively restrictive for CBAM's dual-attention design on channel-constrained Small architectures.
 
 \subsection{Domain Adaptation Is the Bottleneck, Not Architecture}
 
-Our zero-shot PlantDoc results (0--8\% accuracy) demonstrate that even the best PlantVillage-trained model is useless in the field—including EfficientNet-B0, whose 99.38\% PlantVillage accuracy and 4.04M parameters provide no cross-domain advantage. Fine-tuning on PlantDoc (28 classes) achieves 33--39\% accuracy, demonstrating that target-domain data enables meaningful cross-domain performance even with limited samples ($\sim$92 images per class). Furthermore, the 3.62 percentage-point gap between SE and CBAM under fine-tuning is smaller than the 5.17 point gap between the best and worst adaptation strategy overall, confirming that the choice of adaptation approach dominates the choice of attention mechanism. In contrast, both CutMix+MixUp augmentation and DANN fail to bridge the domain gap (0.00\% and 4.39\% respectively vs.\ 8.13\% zero-shot baseline for SE $r=4$), highlighting a fundamental challenge: standard domain adaptation techniques that work on typical domain shift benchmarks falter when the source model has learned a degenerate shortcut rather than merely distribution-shifted features.
+Zero-shot transfer (0--8\%) renders even the best PlantVillage model useless in the field, including EfficientNet-B0 (99.38\% PV, 0.00\% PlantDoc). Fine-tuning achieves 34--40\% on the mapped subset, while both CutMix+MixUp (0.00\%) and DANN (4.39\%) fail. This highlights a fundamental challenge: standard DA techniques falter when the source model has learned a degenerate shortcut rather than merely distribution-shifted features.
 
 \subsection{Limitations}
 
-Several limitations should be noted. First, our PlantDoc evaluation uses a 20-class subset mapped from 29 PlantVillage classes; 9 classes have no PlantDoc counterpart, restricting the scope of cross-domain conclusions. Fine-tuning uses the full 28-class taxonomy, making direct comparison with zero-shot accuracy imperfect. Second, the PlantDoc dataset has only 2,569 images, which limits fine-tuning efficacy and may inflate variance. Third, we train all models from scratch rather than using ImageNet pre-training; transfer learning could alter both PlantVillage and PlantDoc results, though our focus is on architectural comparisons under controlled conditions. Fourth, the CutMix+MixUp augmentation strategy failed to generalize to PlantDoc (0.00\% accuracy), indicating that in-domain augmentations do not resolve domain-specific shortcut learning; however, only three model variants were tested with this method, and different augmentation intensities or broader evaluation could yield different conclusions. Fifth, our statistical analysis is limited by the computational cost of training 16 model variants.
+Our cross-domain evaluation covers 20 of 29 PlantVillage classes; 9 classes lack PlantDoc counterparts. The PlantDoc dataset (2,569 images, $\sim$92 per class) limits fine-tuning efficacy and may inflate variance. All models were trained from scratch; ImageNet pre-training could alter results, though our focus was on controlled architectural comparisons. Only three model variants were tested per adaptation strategy, and only one DANN experiment was completed. The statistical analysis uses single-split results for 15 of 17 models.
 
 %==========================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 
-This study makes four contributions to plant disease classification research. First, we document a systematic background bias in PlantVillage-trained models: ``Background without Leaves'' dominates predictions on real-world PlantDoc images (23--37\%). This bias persists even in high-capacity models: EfficientNet-B0 achieves 99.38\% PlantVillage accuracy yet 0.00\% PlantDoc accuracy, confirming that the bias is a dataset property, not a model capacity limitation. Second, we correct a methodological confound in the literature by demonstrating that at equal compression ratios, SE and CBAM are functionally identical ($<$0.04\% parameter difference); previously reported CBAM efficiency advantages are artifacts of unequal comparison. Third, we demonstrate that target-domain fine-tuning achieves 33--39\% PlantDoc accuracy, while two other strategies (CutMix+MixUp augmentation and DANN) fail to bridge the domain gap (0.00\% and 4.39\%, respectively). The choice of attention mechanism has minimal impact compared to the choice of adaptation strategy. Fourth, we argue that the plant disease classification community should shift focus from architectural micro-optimizations on saturated benchmarks toward domain-invariant training paradigms that enable field deployment. The gap between 99\% laboratory accuracy and 0--8\% field accuracy is the problem that matters; our fine-tuning results and negative DA findings provide baselines for addressing it.
+This study makes four contributions. First, we document a systematic background bias in PlantVillage-trained models: ``Background without Leaves'' dominates PlantDoc predictions (23--37\%), and the bias persists in high-capacity models (EfficientNet-B0: 99.38\% PV, 0.00\% PlantDoc). Second, we correct a methodological confound: at equal compression ratios, SE and CBAM are functionally identical ($<$0.04\% parameter difference). Third, we demonstrate that target-domain fine-tuning achieves 33--39\% PlantDoc accuracy, while CutMix+MixUp augmentation and DANN fail (0.00\% and 4.39\%). The choice of attention mechanism has minimal impact compared to the choice of adaptation strategy. Fourth, we argue that the community should shift focus from architectural micro-optimizations on saturated benchmarks toward domain-invariant training paradigms. The gap between 99\% laboratory accuracy and 0--8\% field accuracy is the problem that matters.
 
-Future work should extend these findings to additional crop types and disease classes, complete the DANN experiments, explore self-supervised pre-training for domain-robust representations, and investigate whether the background bias we identified generalizes to other widely-used plant disease benchmarks. Large-scale field validation with diverse geographic and seasonal conditions remains the ultimate test of deployable plant disease classification systems.
+Future work should extend to additional crop and disease classes, complete DANN experiments, explore self-supervised pre-training for domain-robust representations, and investigate whether the background bias generalizes to other plant disease benchmarks.
 
 %==========================================================================
 \bibliographystyle{elsarticle-num}
