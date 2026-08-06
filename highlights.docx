@@ -1,0 +1,5 @@
+Zero-shot PlantVillage-to-PlantDoc transfer yields only 0--8% accuracy due to background bias.
+SE and CBAM have near-identical parameters at equal compression ratios (<0.04% difference).
+Fine-tuning achieves 33--39% PlantDoc accuracy; augment (0%) and DANN (4.4%) fail to bridge the gap.
+EfficientNet-B0 reaches 99.38% PlantVillage accuracy yet 0.00% PlantDoc, proving bias is dataset-wide.
+PlantVillage is saturated: accuracy gaps below 0.5 points are not statistically significant.

@@ -2,6 +2,10 @@
 %% Copyright 2007-2025 Elsevier Ltd
 %%
 \documentclass[preprint,12pt]{elsarticle}
+\usepackage{setspace}
+\usepackage{lineno}
+\doublespacing
+\linenumbers
 
 \usepackage{tabularx}
 \usepackage{subcaption}
@@ -38,11 +42,14 @@ Plant disease classification from leaf images is a critical precision agricultur
 \end{abstract}
 
 \begin{highlights}
-\item Zero-shot PlantVillage-to-PlantDoc transfer yields only 0--8\% accuracy due to a systematic background bias, where models confound natural backgrounds with PlantVillage's ``Background without Leaves'' class. CBAM at $r=4$ degrades to 0.00\%, predicting entirely on unmapped classes.
-\item The reported parameter-efficiency gap between SE and CBAM is an artifact of unequal compression ratios; at equal reduction, both attention types have near-identical parameter counts and memory footprints (difference $<$0.04\%).
-\item Domain adaptation via target-domain fine-tuning achieves 33--39\% PlantDoc accuracy, while CutMix+MixUp augmentation (0.00\%) and DANN (4.39\%) fail to bridge the domain gap. Larger models provide no remedy: EfficientNet-B0 achieves 99.38\% PlantVillage accuracy yet 0.00\% PlantDoc accuracy.
-\item PlantVillage is a saturated benchmark; accuracy differences below 0.5 percentage points among top models are not statistically significant under bootstrap resampling.
+\item Zero-shot PlantVillage-to-PlantDoc transfer yields only 0--8\% accuracy due to a systematic background bias. CBAM at $r=4$ degrades to 0.00\%.
+\item SE and CBAM have near-identical parameter counts at equal compression ratios ($<$0.04\% difference), correcting a methodological confound in prior work.
+\item Fine-tuning achieves 33--39\% PlantDoc accuracy; augment (0.00\%) and DANN (4.39\%) fail to bridge the domain gap.
+\item EfficientNet-B0 reaches 99.38\% PlantVillage accuracy yet 0.00\% PlantDoc, confirming the bias is a dataset property, not a capacity limitation.
+\item PlantVillage is a saturated benchmark: accuracy differences below 0.5 points among top models are not statistically significant.
 \end{highlights}
+
+
 
 \begin{keyword}
 plant disease classification \sep domain adaptation \sep MobileNetV3 \sep CBAM \sep squeeze-and-excitation \sep precision agriculture
@@ -424,6 +431,18 @@ Our cross-domain evaluation covers 20 of 29 PlantVillage classes; 9 classes lack
 This study makes four contributions. First, we document a systematic background bias in PlantVillage-trained models: ``Background without Leaves'' dominates PlantDoc predictions (23--37\%), and the bias persists in high-capacity models (EfficientNet-B0: 99.38\% PV, 0.00\% PlantDoc). Second, we correct a methodological confound: at equal compression ratios, SE and CBAM are functionally identical ($<$0.04\% parameter difference). Third, we demonstrate that target-domain fine-tuning achieves 33--39\% PlantDoc accuracy, while CutMix+MixUp augmentation and DANN fail (0.00\% and 4.39\%). The choice of attention mechanism has minimal impact compared to the choice of adaptation strategy. Fourth, we argue that the community should shift focus from architectural micro-optimizations on saturated benchmarks toward domain-invariant training paradigms. The gap between 99\% laboratory accuracy and 0--8\% field accuracy is the problem that matters.
 
 Future work should extend to additional crop and disease classes, complete DANN experiments, explore self-supervised pre-training for domain-robust representations, and investigate whether the background bias generalizes to other plant disease benchmarks.
+
+\section*{CRediT authorship contribution statement}
+\textbf{Firmansyah Sundana:} Conceptualization, Methodology, Software, Investigation, Formal analysis, Writing -- original draft, Visualization. \textbf{Fitri Utaminingrum:} Supervision, Writing -- review \& editing. \textbf{Budi Darma Setiawan:} Supervision, Writing -- review \& editing.
+
+\section*{Declaration of competing interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\section*{Data availability}
+The PlantVillage and PlantDoc datasets are publicly available. Code and trained checkpoints are available at \texttt{https://github.com/sundana/MobileNetV3\_CBAM}.
+
+\section*{Acknowledgments}
+This research did not receive any specific grant from funding agencies in the public, commercial, or not-for-profit sectors.
 
 %==========================================================================
 \bibliographystyle{elsarticle-num}
