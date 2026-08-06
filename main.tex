@@ -61,7 +61,7 @@ plant disease classification \sep domain adaptation \sep MobileNetV3 \sep CBAM \
 \section{Introduction}
 \label{sec:intro}
 
-Global food security depends on effective plant disease management, yet manual diagnosis by agronomists remains slow, expensive, and unavailable in many regions \cite{Sajitha2024, Wang2024}. Deep learning-based image classification has emerged as a promising solution, with CNNs consistently exceeding 90\% accuracy on benchmarks such as PlantVillage \cite{Vishnoi2023, Pandian2022, Syed-Ab-Rahman2022}. However, PlantVillage images are captured under controlled laboratory conditions with uniform backgrounds and centered single leaves—conditions that bear little resemblance to real agricultural fields \cite{Pandian2022, Liu2023}.
+Global food security depends on effective plant disease management, yet manual diagnosis by agronomists remains slow, expensive, and unavailable in many regions \cite{Sajitha2024, Wang2024}. Deep learning-based image classification has emerged as a promising solution, with CNNs consistently exceeding 90\% accuracy on benchmarks such as PlantVillage \cite{Mohanty2016, Vishnoi2023, Pandian2022, Syed-Ab-Rahman2022}. However, PlantVillage images are captured under controlled laboratory conditions with uniform backgrounds and centered single leaves—conditions that bear little resemblance to real agricultural fields \cite{Pandian2022, Liu2023}.
 
 This laboratory-to-field domain gap is well-documented in computer vision but underexplored in plant disease classification. Models achieving 99\% accuracy on PlantVillage may fail catastrophically on field images with variable lighting, overlapping foliage, and sensor noise \cite{Lu2025}. Despite this, recent literature focuses on architectural micro-optimizations, often reporting sub-percentage accuracy improvements on PlantVillage while neglecting whether these improvements transfer to realistic deployment scenarios.
 
@@ -163,7 +163,7 @@ Figure \ref{fig:workflow} illustrates the overall experimental pipeline. We firs
 
 \subsubsection{PlantVillage (Source Domain)}
 
-We use 29 classes from the PlantVillage dataset (46,565 images): apple (4), blueberry (1), cherry (2), grape (4), orange (1), peach (2), raspberry (1), squash (1), strawberry (2), tomato (10), and one background-without-leaves class. The dataset is split 70/15/15 (train/validation/test) with stratified sampling (seed=42). Images are resized to $224\times224$ and normalized with ImageNet statistics ($\mu=[0.485,0.456,0.406]$, $\sigma=[0.229,0.224,0.225]$). Training augmentations: RandomResizedCrop, RandomHorizontalFlip, RandomRotation($15^\circ$), and ColorJitter($\pm0.2$).
+We use 29 classes from the PlantVillage dataset \cite{Mohanty2016} (46,565 images): apple (4), blueberry (1), cherry (2), grape (4), orange (1), peach (2), raspberry (1), squash (1), strawberry (2), tomato (10), and one background-without-leaves class. The dataset is split 70/15/15 (train/validation/test) with stratified sampling (seed=42). Images are resized to $224\times224$ and normalized with ImageNet statistics ($\mu=[0.485,0.456,0.406]$, $\sigma=[0.229,0.224,0.225]$). Training augmentations: RandomResizedCrop, RandomHorizontalFlip, RandomRotation($15^\circ$), and ColorJitter($\pm0.2$).
 
 \subsubsection{PlantDoc (Target Domain)}
 
