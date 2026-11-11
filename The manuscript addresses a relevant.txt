@@ -1,0 +1,1 @@
+The manuscript addresses a relevant problem in field plant disease recognition, but it is not ready for peer review in its current form. Changes needed before a new submission: The adapted model still performs poorly on field images. A new submission needs innovation to obtain stronger field results.
